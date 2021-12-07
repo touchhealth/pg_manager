@@ -17,7 +17,6 @@
     <properties>
         <elasticsearch.version>7.13.4</elasticsearch.version>
         <postgresql_version>42.2.23</postgresql_version>
-        <docker.host>unix:///var/run/docker.sock</docker.host>
     </properties>
 
     <dependencies>
@@ -29,11 +28,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.elasticsearch</groupId>-->
-<!--            <artifactId>elasticsearch</artifactId>-->
-<!--            <version>${elasticsearch.version}</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -80,64 +74,9 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>src/main/assembly/pgman.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-install-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.36.1</version>
-                <executions>
-                    <execution>
-                        <id>docker-build</id>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-
-                    <execution>
-                        <id>docker-push</id>
-                        <goals>
-                            <goal>push</goal>
-                        </goals>
-                        <phase>deploy</phase>
-                    </execution>
-                </executions>
-
-                <configuration>
-                    <images>
-                        <!-- App -->
-                        <image>
-                            <name>%g:%l</name>
-                            <build>
-                                <contextDir>pgman</contextDir>
-                                <assembly>
-                                    <targetDir>.</targetDir>
-                                    <descriptor>pgman/pgman.xml</descriptor>
-                                </assembly>
-                            </build>
-                            <registry>nexus3.touchtec.com.br:5001</registry>
-                        </image>
-                    </images>
                 </configuration>
             </plugin>
         </plugins>
