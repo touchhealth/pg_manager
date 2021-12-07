@@ -5,8 +5,8 @@
 name: "Build PGMAN Docker images."
 
 on:
-  push:
-    branches: [ master ]
+  # push:
+  #   branches: [ master ]
   workflow_dispatch:
 
 jobs:
