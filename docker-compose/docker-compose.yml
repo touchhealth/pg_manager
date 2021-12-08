@@ -1,0 +1,87 @@
+---
+
+version: '3.2'
+
+services:
+  elasticsearch:
+    hostname: "elasticsearch"
+    image: "docker.elastic.co/elasticsearch/elasticsearch:${ELK_VERSION}"
+    restart: always
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "pgman_elasticsearch:/usr/share/elasticsearch/data"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx1g -Xms256m"
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      discovery.type: single-node
+      ###
+      cluster.name: "docker-cluster"
+      network.host: "0.0.0.0"
+      xpack.license.self_generated.type: basic
+      xpack.security.enabled: "true"
+      xpack.monitoring.collection.enabled: "true"
+    networks:
+      - pgman
+
+  kibana:
+    hostname: "kibana"
+    image: "docker.elastic.co/kibana/kibana:${ELK_VERSION}"
+    restart: always
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+      xpack.monitoring.ui.container.elasticsearch.enabled: "true"
+      ELASTICSEARCH_USERNAME: "elastic"
+      ELASTICSEARCH_PASSWORD: "${ELASTIC_PASSWORD}"
+    networks:
+      - pgman
+    depends_on:
+      - elasticsearch
+
+  pgman:
+    hostname: "pgman"
+    image: "dgiorgio/pgman:1.4.0"
+    restart: always
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    environment:
+      PGMAN_DATA_SOURCE_URL: ${PGMAN_DATA_SOURCE_URL}
+      PGMAN_DATA_SOURCE_USERNAME: ${PGMAN_DATA_SOURCE_USERNAME}
+      PGMAN_DATA_SOURCE_PASSWORD: ${PGMAN_DATA_SOURCE_PASSWORD}
+      PGMAN_ELASTICSEARCH_HOST: ${PGMAN_ELASTICSEARCH_HOST}
+      PGMAN_ELASTICSEARCH_USERNAME: ${PGMAN_ELASTICSEARCH_USERNAME}
+      PGMAN_ELASTICSEARCH_PASSWORD: ${PGMAN_ELASTICSEARCH_PASSWORD}
+    networks:
+      - pgman
+    depends_on:
+      - elasticsearch
+      - kibana
+
+  postgres:
+    hostname: "postgres"
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "./postgres.conf:/etc/postgresql/postgresql.conf"
+    command:
+      - "postgres"
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
+    networks:
+      - pgman
+
+networks:
+  pgman:
+    driver: bridge
+
+volumes:
+  pgman_elasticsearch:
