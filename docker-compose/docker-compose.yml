@@ -46,7 +46,7 @@ services:
 
   pgman:
     hostname: "pgman"
-    image: "dgiorgio/pgman:1.4.0"
+    image: "touchhealth/pgman:1.4.0"
     restart: always
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
@@ -78,6 +78,8 @@ services:
       - "config_file=/etc/postgresql/postgresql.conf"
     networks:
       - pgman
+    profiles:
+      - test
 
 networks:
   pgman:
